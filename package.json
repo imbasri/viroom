@@ -1,17 +1,25 @@
 {
-  "name": "hermes-cli-adapter",
-  "version": "1.0.0",
+  "name": "viroom",
+  "version": "0.1.0",
   "type": "module",
+  "private": true,
   "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"bun run dev:server\" \"bun run dev:web\"",
+    "dev:server": "bun --watch src/index.ts",
+    "dev:web": "cd frontend && bun run dev",
     "start": "bun run src/index.ts",
-    "test": "bun test test/adapter.test.ts",
-    "check": "bun run --cwd . tsc --noEmit"
+    "build": "cd frontend && bun run build",
+    "typecheck": "bun run typecheck:server && bun run typecheck:web",
+    "typecheck:server": "bunx tsc --noEmit",
+    "typecheck:web": "cd frontend && bun run typecheck",
+    "test": "bun test"
   },
   "dependencies": {
     "elysia": "^1.4.30"
   },
   "devDependencies": {
     "@types/bun": "^1.4.0",
-    "typescript": "^5.0.0"
+    "concurrently": "^9.2.0",
+    "typescript": "^5.6.0"
   }
 }
