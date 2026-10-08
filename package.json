@@ -1,0 +1,17 @@
+{
+  "name": "hermes-cli-adapter",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "test": "bun test test/adapter.test.ts",
+    "check": "bun run --cwd . tsc --noEmit"
+  },
+  "dependencies": {
+    "elysia": "^1.4.30"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "typescript": "^5.0.0"
+  }
+}
