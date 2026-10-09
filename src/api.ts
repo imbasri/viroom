@@ -7,8 +7,10 @@
 //   GET    /api/cron        (R3: multi-profile cron jobs + month grid source)
 import { Elysia, t } from "elysia";
 import { getDb } from "./db";
-import type { AgentState, Session, Setting } from "./types";
+import type { AgentState, Session, Setting, KanbanEnvelope, ProfilesEnvelope } from "./types";
 import { collectCronJobs, assertProfileName, type ScheduledJob } from "./cron";
+import { collectKanban } from "./kanban";
+import { collectProfiles } from "./profiles";
 import type { Statement } from "bun:sqlite";
 
 // bun:sqlite Statement.run() accepts a positional binding array at runtime
@@ -163,6 +165,22 @@ export const api = new Elysia({ prefix: "/api" })
     },
     { query: t.Object({ agent: t.Optional(t.String()) }) },
   )
+  .get("/kanban", async (): Promise<KanbanEnvelope> => {
+    const src = await collectKanban();
+    if (src.availability !== "ok" || src.data === null)
+      return { status: src.availability, data: null, error: src.error };
+    return {
+      status: "ok",
+      data: src.data,
+      error: null,
+    };
+  })
+  .get("/profiles", async (): Promise<ProfilesEnvelope> => {
+    const src = await collectProfiles();
+    if (src.availability !== "ok" || src.data === null)
+      return { status: src.availability, data: null, error: src.error };
+    return { status: "ok", data: src.data, error: null };
+  })
   .put(
     "/settings",
     ({ body }) => {

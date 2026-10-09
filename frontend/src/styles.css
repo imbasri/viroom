@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+/* Office 3D overlay: scene frame, label projector markers, floor buttons, controls.
+   Ported from ruang/src/styles.css (.office-3d*). */
+.office-3d { aspect-ratio: 2.1 / 1; background: #15201c; border: 8px solid #121a18; box-shadow: inset 0 0 0 2px #4d6459; min-height: 420px; position: relative; touch-action: none; }
+.office-3d canvas { display: block; }
+.office-3d:focus-visible { outline: 2px solid var(--accent, #6fb6d6); outline-offset: 2px; }
+.office-3d-labels { inset: 0; overflow: clip; pointer-events: none; position: absolute; }
+.office-3d-labels > * { left: 0; position: absolute; top: 0; visibility: hidden; will-change: transform; }
+.office-3d-labels > .visible { visibility: visible !important; }
+.agent-tag-3d { align-items: center; background: transparent; border: 0; color: #eef9ef; cursor: pointer; display: grid; gap: 4px; justify-items: center; padding: 0; pointer-events: auto; white-space: nowrap; }
+.agent-tag-row { align-items: center; display: flex; gap: 4px; }
+.pixel-station-name { font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .03em; }
+.agent-tag-3d .badge { font-size: 9px; padding: 2px 5px; }
+.agent-tag-3d .badge.unknown { background: #d9770644; color: #fcd34d; border: 1px solid #d9770666; border-radius: 3px; }
+.agent-tag-3d:focus-visible { outline: 2px solid #f5bd6d; outline-offset: 3px; }
+.badge { border: 1px solid rgba(255,255,255,.15); border-radius: 4px; color: #d4e8dc; font-size: 9px; padding: 2px 6px; }
+.badge.good { border-color: #10b981; color: #5eead4; }
+.badge.unknown { border-color: #fbbf24; color: #fcd34d; }
+
+.office-3d-floors { display: flex; gap: 6px; position: absolute; left: 12px; bottom: 12px; z-index: 2; }
+.office-floor-btn { align-items: center; background: rgba(18,26,24,.78); border: 1px solid rgba(255,255,255,.22); border-radius: 6px; color: #f4efe6; cursor: pointer; display: flex; font-size: 12px; gap: 6px; padding: 5px 10px; }
+.office-floor-btn:hover { background: rgba(18,26,24,.92); }
+.office-floor-btn.active { background: #d9534f; border-color: #f4efe6; }
+
+.office-3d-tools { display: flex; gap: 6px; position: absolute; right: 12px; bottom: 12px; z-index: 2; }
+.office-3d-tools button { background: rgba(18,26,24,.78); border: 1px solid rgba(255,255,255,.22); border-radius: 6px; color: #f4efe6; cursor: pointer; font: inherit; font-size: 12px; padding: 5px 10px; }
+.office-3d-tools button:hover { background: rgba(18,26,24,.92); }
+.office-3d-tools button.active { background: #d9534f; border-color: #f4efe6; }
+.office-3d-tools button.active.sleep { background: #0ea5e9; }
+
+@media (max-width: 700px) {
+  .office-3d { aspect-ratio: auto; height: 400px; min-height: 0; }
+  .office-3d-tools, .office-3d-floors { bottom: 8px; }
+  .office-3d-tools { right: 8px; gap: 4px; }
+  .agent-tag-3d .pixel-station-name { font-size: 9px; }
+  .agent-tag-3d .badge { font-size: 8px; }
+}
+
+/* Office is the home page and fills the screen below the header. */
+.app-office main { max-width: none; padding: 0; }
+.office-stage { height: calc(100dvh - 49px); min-height: 460px; overflow: hidden; position: relative; }
+.office-stage .office-3d { aspect-ratio: auto; border: 0; box-shadow: none; height: 100%; inset: 0; min-height: 0; position: absolute; }
+.office-stage .office-3d-tools, .office-stage .office-3d-floors { bottom: 12px; top: auto; }
+.office-3d-hint { background: color-mix(in srgb, var(--surface) 80%, transparent); border-radius: 4px; bottom: 12px; left: 12px; padding: 5px 9px; pointer-events: none; position: absolute; z-index: 3; }
+.office-failed { left: 16px; position: absolute; right: 16px; top: 70px; z-index: 3; }
+.office-note { margin: 0 0 10px; }
