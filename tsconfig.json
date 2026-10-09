@@ -7,8 +7,9 @@
     "noEmit": true,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "lib": ["ESNext"],
-    "types": ["bun"]
+    "lib": ["ESNext", "DOM"],
+    "types": ["bun"],
+    "isolatedModules": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "lib/**/*.ts", "server/**/*.ts", "tests/**/*.ts", "web/**/*.ts"]
 }

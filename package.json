@@ -9,16 +9,21 @@
     "dev:web": "cd frontend && bun run dev",
     "start": "bun run src/index.ts",
     "build": "cd frontend && bun run build",
+    "vendor": "mkdir -p web/vendor && cp node_modules/three/build/three.module.js web/vendor/three.module.js",
     "typecheck": "bun run typecheck:server && bun run typecheck:web",
     "typecheck:server": "bunx tsc --noEmit",
     "typecheck:web": "cd frontend && bun run typecheck",
-    "test": "bun test"
+    "build:web": "tsc -p tsconfig.web.json",
+    "test": "bun test",
+    "test:node": "node --experimental-strip-types --test tests/office3d-layout.test.ts"
   },
   "dependencies": {
-    "elysia": "^1.4.30"
+    "elysia": "^1.4.30",
+    "three": "^0.186.0"
   },
   "devDependencies": {
     "@types/bun": "^1.4.0",
+    "@types/three": "^0.186.0",
     "concurrently": "^9.2.0",
     "typescript": "^5.6.0"
   }
