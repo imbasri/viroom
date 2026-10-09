@@ -127,3 +127,33 @@ Dir `src/*.test.*` (vitest, `test`: `vitest run`):
 | Lock | LockScreen (code), ProfileUnlock (PIN 6 digit per agen, 15 min), localStorage + events |
 | Global store | Tidak ada — React hooks + context `RefreshContext` |
 | Tests | office-dialog-focus, pending-state, access + 8 suite lain |
+
+---
+## Rujukan Desain Ruangan (visual ref — 2026-10-09)
+
+**File:** `/home/basrenk/.hermes/images/clip_20261009_060539_1.png` (1024x512)
+
+### Gaya
+- Pixel-art 2D **isometric**, sudut pandang ~2/4 isometric bird's-eye dari depan-atas.
+- Rasio layar ~2:1, banner. Dinding luar transparan/terbuka (ruang terasa terbuka).
+- Tema: kru kapal laut, semua pod mengapung di atas laut biru; kapal layar di kiri bawah.
+
+### Layout
+- **Arena pusat**: "Open Collaboration Arena" (lantai putih-biru terang, elips) — titik kumpul/koordinasi.
+- **10 pod melingkar** mengelilingi arena (searah jarum jam, mulai kiri atas):
+  1. Zoro (Frontend) — pod hijau, meja panjang, monitor ganda
+  2. Sanji (Backend) — pod cokelat/kayu, dapur + kompor
+  3. Basrenk (CEO) — pod merah marun, singgasana, layar besar
+  4. Franky (Security & Tech) — pod abu baja, rak server/panel
+  5. Jimbe (DevOps) — pod biru laut, terumbu karang
+  6. Brook (WU/UX) — pod ungu gelap, piano/biola
+  7. Franky (Security) — pod krem/okre, brankas
+  8. Robin (Research) — pod cokelat hangat, shoji/tatami, perapian
+  9. Usopp (Growth) — pod hijau-zaitun, papan tulis/grafik
+  10. Nami (Product) — pod biru langit, awan, meja putih
+
+### Implikasi implementasi
+- **R2 (`lib/office3d-layout.ts: createLayout(n)`)**: posisi pod mengikuti sudut = 2π*i/n pada elips; CEO di puncak.
+- **Warna pod**: palet per karakter sesuai tema (hijau, cokelat, merah marun, abu baja, biru laut, ungu, krem, hangat Jepang, hijau-zaitun, biru langit).
+- **Elemen dekoratif per pod**: meja+monitor+kursi (default), singgasana (CEO), piano (Brook), kompor (Sanji), brankas (Security), perapian (Robin), rak server (Franky).
+- **Fallback 2D**: isometric pixel-art canvas (bukan top-down grid) sesuai gambar ini.
