@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "ESNext",
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["vitest.config.ts", "test/**/*.ts"]
+}
