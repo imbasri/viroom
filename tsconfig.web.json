@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "outDir": "web/dist",
+    "rootDir": ".",
+    "types": []
+  },
+  "include": ["lib/office3d-layout.ts", "web/app.ts"]
+}

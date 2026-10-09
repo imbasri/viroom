@@ -3,4 +3,6 @@ data/
 *.db
 test-bin/
 dist/
+web/dist/
+web/vendor/
 .env
