@@ -4,9 +4,11 @@
 //   POST   /api/agents /api/sessions
 //   PATCH  /api/agents/:id
 //   PUT    /api/settings
+//   GET    /api/cron        (R3: multi-profile cron jobs + month grid source)
 import { Elysia, t } from "elysia";
 import { getDb } from "./db";
 import type { AgentState, Session, Setting } from "./types";
+import { collectCronJobs, assertProfileName, type ScheduledJob } from "./cron";
 import type { Statement } from "bun:sqlite";
 
 // bun:sqlite Statement.run() accepts a positional binding array at runtime
@@ -120,6 +122,47 @@ export const api = new Elysia({ prefix: "/api" })
       .query(`SELECT key, value FROM settings ORDER BY key`)
       .all() as Setting[];
   })
+  .get(
+    "/cron",
+    async ({ query }) => {
+      const agent = (query as { agent?: string }).agent;
+      if (agent !== undefined) {
+        try {
+          assertProfileName(agent);
+        } catch (e) {
+          const message = e instanceof Error ? e.message : String(e);
+          return new Response(
+            JSON.stringify({
+              status: "error",
+              data: null,
+              error: message,
+            }),
+            { status: 400, headers: { "content-type": "application/json" } },
+          );
+        }
+      }
+      const src = await collectCronJobs();
+      if (src.availability !== "ok" || src.data === null) {
+        return {
+          status: src.availability,
+          data: null,
+          error: src.error,
+        };
+      }
+      const jobs = agent
+        ? src.data.jobs.filter((j) => j.agent === agent)
+        : src.data.jobs;
+      return {
+        status: "ok" as const,
+        data: {
+          jobs,
+          ...(src.data.failedProfiles ? { failedProfiles: src.data.failedProfiles } : {}),
+          fetchedAt: src.data.fetchedAt,
+        },
+      };
+    },
+    { query: t.Object({ agent: t.Optional(t.String()) }) },
+  )
   .put(
     "/settings",
     ({ body }) => {

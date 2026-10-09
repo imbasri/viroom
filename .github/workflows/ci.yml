@@ -1,0 +1,66 @@
+# viroom CI — test pipeline + security scan. Gate: vitest + gitleaks.
+#
+# Vitest runs under Node (bun:sqlite is aliased to a local Node shim in
+# vitest.config.ts). Bun is still required for the dev server, so typecheck
+# runs through the Bun `bunx tsc` path on a separate job.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Vitest suite
+        run: npx vitest run
+
+      - name: Vitest coverage report
+        run: npx vitest run --coverage
+        continue-on-error: true
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Typecheck server
+        run: bun run typecheck:server
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # gitleaks scans the full history — fetch everything.
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        with:
+          config: .gitleaks.toml

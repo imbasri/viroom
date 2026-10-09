@@ -6,3 +6,5 @@ dist/
 web/dist/
 web/vendor/
 .env
+# Vitest coverage output (report-only in CI)
+coverage/
