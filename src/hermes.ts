@@ -6,6 +6,7 @@
 // semua perintah hanya memanggil sub-command yang tidak memutasi state.
 
 import { execFile } from "node:child_process";
+import type { KanbanBoard } from "./types";
 
 /** Status ketersediaan sebuah sumber data. */
 export type Availability = "ok" | "unavailable" | "error";
@@ -345,6 +346,8 @@ export interface TaskSummary {
   title: string;
   status: string;
   assignee: string | null;
+  priority?: number;
+  board?: string;
 }
 
 export async function readTasks(board: string): Promise<Source<TaskSummary[]>> {
@@ -368,10 +371,70 @@ export async function readTasks(board: string): Promise<Source<TaskSummary[]>> {
           title: String(o.title ?? ""),
           status: String(o.status ?? ""),
           assignee: o.assignee == null ? null : String(o.assignee),
+          priority: o.priority != null ? Number(o.priority) : undefined,
+          board: o.board != null ? String(o.board) : undefined,
         };
       }),
     );
   } catch (e) {
     return sourceError(e instanceof Error ? e.message : String(e));
   }
+}
+
+/** Parse hasil `hermes kanban boards list --json` → daftar board. */
+export function parseBoardsJson(stdout: string): KanbanBoard[] {
+  const j = safeJson(stdout);
+  if (!Array.isArray(j)) return [];
+  return j.map((b) => {
+    const o = b as Record<string, unknown>;
+    return {
+      slug: String(o.slug ?? ""),
+      name: String(o.name ?? o.slug ?? ""),
+      current: Boolean(o.current),
+      total: Number.isFinite(Number(o.total)) ? Number(o.total) : 0,
+    };
+  });
+}
+
+/** Snapshot semua board kanban (fan-out per board) untuk /api/kanban. */
+export async function collectTasks(
+  boards: string[],
+): Promise<Source<{ tasks: TaskSummary[]; boards?: KanbanBoard[]; failedBoards?: string[]; fetchedAt: string }>> {
+  const fetchedAt = new Date().toISOString();
+  if (boards.length === 0)
+    return {
+      availability: "error",
+      data: { tasks: [], fetchedAt },
+      error: "no kanban boards found",
+    };
+  const results = await Promise.all(boards.map((b) => readTasks(b)));
+  const tasks: TaskSummary[] = [];
+  const failedBoards: string[] = [];
+  const boardInfo: KanbanBoard[] = [];
+  for (let i = 0; i < boards.length; i++) {
+    const r = results[i];
+    if (r.availability === "ok") {
+      const rows = r.data ?? [];
+      for (const t of rows) tasks.push({ ...t, board: boards[i] });
+      boardInfo.push({
+        slug: boards[i],
+        name: boards[i],
+        current: false,
+        total: rows.length,
+      });
+    } else {
+      failedBoards.push(boards[i]);
+    }
+  }
+  if (failedBoards.length === boards.length)
+    return {
+      availability: "unavailable",
+      data: { tasks: [], fetchedAt, failedBoards },
+      error: `all boards failed: ${failedBoards.join(", ")}`,
+    };
+  return {
+    availability: "ok",
+    data: { tasks, fetchedAt, ...(failedBoards.length ? { failedBoards } : {}), boards: boardInfo },
+    error: null,
+  };
 }
