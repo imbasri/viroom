@@ -8,6 +8,7 @@
 
 import { Component, lazy, Suspense, useState, type CSSProperties, type ReactNode } from "react";
 import { useSource } from "@/lib/use-source";
+import { useOfficeWs } from "@/lib/use-office-ws";
 import { Layout } from "@/lib/layout";
 import { createLayout, type Layout as OfficeLayout, type Vec3 } from "../../../lib/office3d-layout";
 import { Button } from "@/components/ui/button";
@@ -153,16 +154,33 @@ export default function Office3D() {
     15_000,
   );
 
+  const office = status === "ready" ? data : undefined;
+  const initialPeople = office?.people ?? [];
+
+  // Live presence layer — WS updates arrive instantly, 15s poll is the fallback.
+  const { people: livePeople, wsStatus, setState: wsSetState } = useOfficeWs({
+    initial: initialPeople,
+    enabled: status === "ready",
+  });
+
+  // Use the live list if WS is connected, otherwise the last poll.
+  const people = wsStatus === "live" ? livePeople : initialPeople;
+
   const [preferredView, setPreferredView] = useState<"3d" | "2d">("3d");
   const [selected, setSelected] = useState<string | undefined>();
 
-  const office = status === "ready" ? data : undefined;
-  const people = office?.people ?? [];
   // Server already returns the layout it used; recreate only as a fallback so
   // the client never disagrees with /api/office positions.
   const layout: OfficeLayout = office?.layout ?? createLayout(N);
 
   const onSelect = (id: string) => setSelected(id);
+
+  const wsBadge =
+    wsStatus === "live" ? (
+      <span className="ml-2 inline-flex items-center gap-1 rounded border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> live
+      </span>
+    ) : null;
 
   const actions = (
     <div className="flex items-center gap-2">
@@ -185,6 +203,7 @@ export default function Office3D() {
       <Button variant="secondary" size="sm" onClick={() => reload()}>
         Muat ulang
       </Button>
+      {wsBadge}
     </div>
   );
 
@@ -235,6 +254,25 @@ export default function Office3D() {
           Diperbarui{" "}
           {new Date(fetchedAt).toLocaleString("id-ID", { timeZoneName: "short" })}
         </p>
+      )}
+
+      {wsStatus === "live" && (
+        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          <span className="text-zinc-500">Demo (karakter langsung jalan):</span>
+          {(["desk", "meeting", "lounge", "away"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-zinc-300 transition-colors hover:bg-zinc-700"
+              onClick={() => {
+                const target = people[0];
+                if (target) wsSetState(target.id, s, target.seat);
+              }}
+            >
+              {s === "desk" ? "Di meja" : s === "meeting" ? "Meeting" : s === "lounge" ? "Lounge" : "Away"}
+            </button>
+          ))}
+        </div>
       )}
 
       {status === "failed" && office && (
