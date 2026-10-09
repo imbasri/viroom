@@ -8,7 +8,7 @@
 // node:sqlite ships an async-style Database (v26); the Bun API's sync surface
 // is small enough that we delegate to node:sqlite directly.
 // @ts-expect-error node:sqlite types are not yet in @types for this toolchain.
-import { Database as NodeDatabase } from "node:sqlite";
+import { DatabaseSync as NodeDatabase } from "node:sqlite";
 
 type Stmt = {
   run: (...a: unknown[]) => { lastInsertRowid: unknown; changes: number };
